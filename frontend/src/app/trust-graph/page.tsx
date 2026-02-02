@@ -58,26 +58,26 @@ interface NodeObject {
 }
 
 export default function TrustGraphPage() {
-  const fgRef = useRef<any>();
+  const fgRef = useRef<any>(null);
   const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
 
-  const handleNodeClick = useCallback((node: NodeObject) => {
-    setSelectedNode(node);
+  const handleNodeClick = useCallback((node: any) => {
+    setSelectedNode(node as NodeObject);
     if (fgRef.current) {
       fgRef.current.centerAt(node.x, node.y, 500);
       fgRef.current.zoom(2, 500);
     }
   }, []);
 
-  const getNodeColor = (node: NodeObject) => {
+  const getNodeColor = (node: any) => {
     if (node.group === 'team') return '#3b82f6';
     if (node.reputation >= 85) return '#22c55e';
     if (node.reputation >= 70) return '#eab308';
     return '#9ca3af';
   };
 
-  const getNodeSize = (node: NodeObject) => {
+  const getNodeSize = (node: any) => {
     return 4 + (node.reputation / 20);
   };
 
