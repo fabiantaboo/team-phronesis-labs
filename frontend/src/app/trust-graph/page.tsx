@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useTrustGraph } from '@/lib/useTrustGraph';
-import { TrustNode } from '@/lib/contracts';
+import { TrustNode, EXPLORER_URL } from '@/lib/contracts';
 
 const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
@@ -330,7 +330,7 @@ export default function TrustGraphPage() {
                 <div>
                   <p className="text-slate-500 mb-1">Reputation Registry</p>
                   <a 
-                    href="https://basescan.org/address/0x96BF408C918355a4AE3EE5eedf962F647c962e0d"
+                    href={`${EXPLORER_URL}/address/0x96BF408C918355a4AE3EE5eedf962F647c962e0d`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-purple-400 hover:text-purple-300 font-mono break-all"
@@ -341,7 +341,7 @@ export default function TrustGraphPage() {
                 <div>
                   <p className="text-slate-500 mb-1">Skill Endorsement</p>
                   <a 
-                    href="https://basescan.org/address/0x4d2Db474D472dCF7aACD694120adD70ED02f9Ec9"
+                    href={`${EXPLORER_URL}/address/0x4d2Db474D472dCF7aACD694120adD70ED02f9Ec9`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-purple-400 hover:text-purple-300 font-mono break-all"

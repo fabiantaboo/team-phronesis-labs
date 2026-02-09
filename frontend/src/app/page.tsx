@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getReputationRegistry, getProvider, CONTRACTS } from "@/lib/contracts";
+import { getReputationRegistry, CONTRACTS, EXPLORER_URL } from "@/lib/contracts";
 
 export default function Home() {
   const [stats, setStats] = useState({ totalAgents: 0, loading: true });
@@ -56,7 +56,7 @@ export default function Home() {
         <section className="container mx-auto px-6 py-20 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 rounded-full text-purple-300 text-sm font-medium mb-8 border border-purple-500/20">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            Live on Base Mainnet
+            Live on Base Sepolia
           </div>
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
             Trust Protocol for the<br />
@@ -213,11 +213,11 @@ export default function Home() {
         <section id="contracts" className="container mx-auto px-6 py-20">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-white mb-4">Smart Contracts</h2>
-            <p className="text-slate-400">Deployed and verified on Base Mainnet</p>
+            <p className="text-slate-400">Deployed on Base Sepolia testnet</p>
           </div>
           <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-6">
             <a 
-              href={`https://basescan.org/address/${CONTRACTS.REPUTATION_REGISTRY}`}
+              href={`${EXPLORER_URL}/address/${CONTRACTS.REPUTATION_REGISTRY}`}
               target="_blank"
               rel="noopener noreferrer"
               className="group bg-slate-900/50 rounded-xl p-6 border border-slate-800 hover:border-purple-500/50 transition"
@@ -231,7 +231,7 @@ export default function Home() {
               <p className="text-slate-500 font-mono text-sm break-all">{CONTRACTS.REPUTATION_REGISTRY}</p>
             </a>
             <a 
-              href={`https://basescan.org/address/${CONTRACTS.SKILL_ENDORSEMENT}`}
+              href={`${EXPLORER_URL}/address/${CONTRACTS.SKILL_ENDORSEMENT}`}
               target="_blank"
               rel="noopener noreferrer"
               className="group bg-slate-900/50 rounded-xl p-6 border border-slate-800 hover:border-purple-500/50 transition"

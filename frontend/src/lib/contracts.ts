@@ -1,12 +1,14 @@
 import { ethers } from 'ethers';
 
-// Contract addresses on Base Mainnet
+// Contract addresses on Base Sepolia (testnet)
 export const CONTRACTS = {
   REPUTATION_REGISTRY: '0x96BF408C918355a4AE3EE5eedf962F647c962e0d',
   SKILL_ENDORSEMENT: '0x4d2Db474D472dCF7aACD694120adD70ED02f9Ec9',
 } as const;
 
-export const BASE_MAINNET_RPC = 'https://mainnet.base.org';
+export const BASE_RPC = 'https://sepolia.base.org';
+export const CHAIN_NAME = 'Base Sepolia';
+export const EXPLORER_URL = 'https://sepolia.basescan.org';
 
 // ABIs (minimal for read operations)
 export const REPUTATION_REGISTRY_ABI = [
@@ -20,9 +22,10 @@ export const REPUTATION_REGISTRY_ABI = [
 
 export const SKILL_ENDORSEMENT_ABI = [
   'function getAgentSkills(address agent) view returns (string[])',
-  'function getSkillEndorsement(address agent, string skill) view returns (uint256 totalEndorsements, uint256 credibilityScore)',
-  'function findAgentsBySkill(string skill, uint256 minCredibility) view returns (address[])',
-  'event SkillEndorsed(address indexed agent, address indexed endorser, string skill, uint256 newCredibility)',
+  'function getSkillDetails(address agent, string skill) view returns (tuple(string name, uint256 endorsementCount, uint256 weightedScore, bool exists))',
+  'function getSkillScore(address agent, string skill) view returns (uint256)',
+  'function getTotalEndorsements(address agent) view returns (uint256)',
+  'event SkillEndorsed(address indexed agent, string indexed skill, address indexed endorser, uint256 weight)',
 ];
 
 // Types
@@ -57,7 +60,7 @@ let provider: ethers.JsonRpcProvider | null = null;
 
 export function getProvider(): ethers.JsonRpcProvider {
   if (!provider) {
-    provider = new ethers.JsonRpcProvider(BASE_MAINNET_RPC);
+    provider = new ethers.JsonRpcProvider(BASE_RPC);
   }
   return provider;
 }

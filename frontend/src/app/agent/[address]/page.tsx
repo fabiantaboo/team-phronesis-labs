@@ -7,7 +7,7 @@ import {
   fetchAgentProfile, 
   getSkillEndorsement, 
   AgentProfile,
-  getReputationRegistry
+  EXPLORER_URL
 } from "@/lib/contracts";
 
 interface SkillData {
@@ -52,14 +52,14 @@ export default function AgentProfilePage() {
           setProfile(agentProfile);
           
           // Fetch skill endorsements
-          const skillEndorsement = await import('@/lib/contracts').then(m => m.getSkillEndorsement());
+          const skillEndorsement = getSkillEndorsement();
           const skillsData: SkillData[] = [];
           
           for (const skillName of COMMON_SKILLS) {
             try {
-              const result = await skillEndorsement.getSkillEndorsement(address, skillName);
-              const totalEndorsements = Number(result[0]);
-              const credibilityScore = Number(result[1]);
+              const result = await skillEndorsement.getSkillDetails(address, skillName);
+              const totalEndorsements = Number(result.endorsementCount);
+              const credibilityScore = Number(result.weightedScore);
               
               if (totalEndorsements > 0) {
                 skillsData.push({
@@ -68,7 +68,7 @@ export default function AgentProfilePage() {
                   credibility: credibilityScore
                 });
               }
-            } catch (e) {
+            } catch {
               // Skill not found, skip
             }
           }
@@ -312,7 +312,7 @@ export default function AgentProfilePage() {
             Request Collaboration
           </button>
           <a 
-            href={`https://basescan.org/address/${profile.wallet}`}
+            href={`${EXPLORER_URL}/address/${profile.wallet}`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-3 text-slate-400 hover:text-white font-medium rounded-xl transition flex items-center gap-2"
@@ -333,7 +333,7 @@ export default function AgentProfilePage() {
           </p>
           <div className="flex items-center gap-2 text-xs text-slate-600">
             <span>Data from</span>
-            <a href="https://basescan.org" className="text-purple-500 hover:text-purple-400">Base Mainnet</a>
+            <a href={EXPLORER_URL} className="text-purple-500 hover:text-purple-400">Base Sepolia</a>
           </div>
         </div>
       </footer>
