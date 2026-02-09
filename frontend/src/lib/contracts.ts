@@ -7,6 +7,7 @@ export const CONTRACTS = {
 } as const;
 
 export const BASE_SEPOLIA_RPC = 'https://sepolia.base.org';
+export const BASE_SEPOLIA_RPC_FALLBACK = 'https://base-sepolia-rpc.publicnode.com';
 export const BASE_MAINNET_RPC = BASE_SEPOLIA_RPC; // Alias for compatibility
 
 // ABIs (minimal for read operations)
@@ -53,13 +54,20 @@ export interface TrustLink {
   strength: number;
 }
 
-// Provider singleton
+// Provider singleton with fallback
 let provider: ethers.JsonRpcProvider | null = null;
+let usingFallback = false;
 
 export function getProvider(): ethers.JsonRpcProvider {
   if (!provider) {
-    provider = new ethers.JsonRpcProvider(BASE_MAINNET_RPC);
+    provider = new ethers.JsonRpcProvider(usingFallback ? BASE_SEPOLIA_RPC_FALLBACK : BASE_MAINNET_RPC);
   }
+  return provider;
+}
+
+export function switchToFallbackProvider(): ethers.JsonRpcProvider {
+  usingFallback = true;
+  provider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC_FALLBACK);
   return provider;
 }
 
@@ -105,13 +113,29 @@ export async function fetchAgentProfile(address: string): Promise<AgentProfile |
   }
 }
 
-// Fetch trust graph data from events
+// Fetch trust graph data from events with RPC fallback
 export async function fetchTrustGraph(): Promise<{ nodes: TrustNode[]; links: TrustLink[] }> {
+  try {
+    return await _fetchTrustGraphFromChain();
+  } catch (e) {
+    console.warn('Primary RPC failed, trying fallback...', e);
+    try {
+      switchToFallbackProvider();
+      return await _fetchTrustGraphFromChain();
+    } catch (fallbackError) {
+      console.error('Both RPC endpoints failed:', fallbackError);
+      // Return empty data - caller handles graceful degradation
+      return { nodes: [], links: [] };
+    }
+  }
+}
+
+async function _fetchTrustGraphFromChain(): Promise<{ nodes: TrustNode[]; links: TrustLink[] }> {
   const contract = getReputationRegistry();
-  const provider = getProvider();
+  const rpcProvider = getProvider();
   
   // Get recent blocks (last ~1 day on Base)
-  const currentBlock = await provider.getBlockNumber();
+  const currentBlock = await rpcProvider.getBlockNumber();
   const fromBlock = Math.max(0, currentBlock - 43200); // ~1 day of blocks
   
   // Fetch AgentRegistered events
@@ -126,21 +150,25 @@ export async function fetchTrustGraph(): Promise<{ nodes: TrustNode[]; links: Tr
   const nodesMap = new Map<string, TrustNode>();
   
   for (const event of registeredEvents) {
-    const args = (event as ethers.EventLog).args;
-    if (args) {
-      const address = args[0] as string;
-      const name = args[1] as string;
-      
-      // Fetch current profile
-      const profile = await fetchAgentProfile(address);
-      
-      nodesMap.set(address, {
-        id: name || address.slice(0, 8),
-        address,
-        reputation: profile?.reputation || 100,
-        jobs: profile?.jobsCompleted || 0,
-        group: 'registered',
-      });
+    try {
+      const args = (event as ethers.EventLog).args;
+      if (args) {
+        const address = args[0] as string;
+        const name = args[1] as string;
+        
+        // Fetch current profile
+        const profile = await fetchAgentProfile(address);
+        
+        nodesMap.set(address, {
+          id: name || address.slice(0, 8),
+          address,
+          reputation: profile?.reputation || 100,
+          jobs: profile?.jobsCompleted || 0,
+          group: 'registered',
+        });
+      }
+    } catch (e) {
+      console.warn('Error processing registered event:', e);
     }
   }
   
@@ -148,35 +176,39 @@ export async function fetchTrustGraph(): Promise<{ nodes: TrustNode[]; links: Tr
   const links: TrustLink[] = [];
   
   for (const event of endorsementEvents) {
-    const args = (event as ethers.EventLog).args;
-    if (args) {
-      const agent = args[0] as string;
-      const endorser = args[1] as string;
-      const weight = Number(args[2]);
-      
-      // Add endorser as node if not present
-      if (!nodesMap.has(endorser)) {
-        const profile = await fetchAgentProfile(endorser);
-        nodesMap.set(endorser, {
-          id: profile?.name || endorser.slice(0, 8),
-          address: endorser,
-          reputation: profile?.reputation || 100,
-          jobs: profile?.jobsCompleted || 0,
-          group: 'endorser',
-        });
+    try {
+      const args = (event as ethers.EventLog).args;
+      if (args) {
+        const agent = args[0] as string;
+        const endorser = args[1] as string;
+        const weight = Number(args[2]);
+        
+        // Add endorser as node if not present
+        if (!nodesMap.has(endorser)) {
+          const profile = await fetchAgentProfile(endorser);
+          nodesMap.set(endorser, {
+            id: profile?.name || endorser.slice(0, 8),
+            address: endorser,
+            reputation: profile?.reputation || 100,
+            jobs: profile?.jobsCompleted || 0,
+            group: 'endorser',
+          });
+        }
+        
+        // Add link
+        const endorserNode = nodesMap.get(endorser);
+        const agentNode = nodesMap.get(agent);
+        
+        if (endorserNode && agentNode) {
+          links.push({
+            source: endorserNode.id,
+            target: agentNode.id,
+            strength: Math.min(1, weight / 10),
+          });
+        }
       }
-      
-      // Add link
-      const endorserNode = nodesMap.get(endorser);
-      const agentNode = nodesMap.get(agent);
-      
-      if (endorserNode && agentNode) {
-        links.push({
-          source: endorserNode.id,
-          target: agentNode.id,
-          strength: Math.min(1, weight / 10),
-        });
-      }
+    } catch (e) {
+      console.warn('Error processing endorsement event:', e);
     }
   }
   

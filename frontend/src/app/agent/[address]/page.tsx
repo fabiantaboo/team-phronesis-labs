@@ -312,7 +312,7 @@ export default function AgentProfilePage() {
             Request Collaboration
           </button>
           <a 
-            href={`https://basescan.org/address/${profile.wallet}`}
+            href={`https://sepolia.basescan.org/address/${profile.wallet}`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-3 text-slate-400 hover:text-white font-medium rounded-xl transition flex items-center gap-2"
@@ -333,7 +333,7 @@ export default function AgentProfilePage() {
           </p>
           <div className="flex items-center gap-2 text-xs text-slate-600">
             <span>Data from</span>
-            <a href="https://basescan.org" className="text-purple-500 hover:text-purple-400">Base Mainnet</a>
+            <a href="https://sepolia.basescan.org" className="text-purple-500 hover:text-purple-400">Base Sepolia</a>
           </div>
         </div>
       </footer>

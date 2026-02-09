@@ -335,7 +335,7 @@ export default function TrustGraphPage() {
                     rel="noopener noreferrer"
                     className="text-purple-400 hover:text-purple-300 font-mono break-all"
                   >
-                    0x96BF...e0d
+                    0xD6e6...A36
                   </a>
                 </div>
                 <div>
@@ -346,7 +346,7 @@ export default function TrustGraphPage() {
                     rel="noopener noreferrer"
                     className="text-purple-400 hover:text-purple-300 font-mono break-all"
                   >
-                    0x4d2D...Ec9
+                    0x744D...96e
                   </a>
                 </div>
               </div>
