@@ -1,12 +1,13 @@
 import { ethers } from 'ethers';
 
-// Contract addresses on Base Mainnet
+// Contract addresses on Base Sepolia
 export const CONTRACTS = {
-  REPUTATION_REGISTRY: '0x96BF408C918355a4AE3EE5eedf962F647c962e0d',
-  SKILL_ENDORSEMENT: '0x4d2Db474D472dCF7aACD694120adD70ED02f9Ec9',
+  REPUTATION_REGISTRY: '0xD6e67da69411734fC2b0A5121365376b02940A36',
+  SKILL_ENDORSEMENT: '0x744D23512F5dEA1c861D52a9e4350406e9ffe96e',
 } as const;
 
-export const BASE_MAINNET_RPC = 'https://mainnet.base.org';
+export const BASE_SEPOLIA_RPC = 'https://sepolia.base.org';
+export const BASE_MAINNET_RPC = BASE_SEPOLIA_RPC; // Alias for compatibility
 
 // ABIs (minimal for read operations)
 export const REPUTATION_REGISTRY_ABI = [
